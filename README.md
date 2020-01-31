@@ -1,12 +1,9 @@
 # vue-hangman
 
-## TODO
+# TODO
 
-- refactor & cleanup
-- better word list
-- Enter key Play again
-- prettier svg, animate with gsap?
-- styling
+- manage empty spaces
+- find another json list with flags and stats
 
 ## Project setup
 
