@@ -1,9 +1,25 @@
 <template>
   <div>
-    <h1>vue-hangman</h1>
-    <p>Find the Country - Enter a letter</p>
+    <h3>vue-hangman, updated with vite / vue 3</h3>
+    <h2>Find the Country - Enter a letter</h2>
     <div class="game-container">
-      <svgHangman />
+      <svg height="250" width="200" class="figure-container">
+        <!-- Rod -->
+        <line x1="60" y1="20" x2="140" y2="20" />
+        <line x1="140" y1="20" x2="140" y2="50" />
+        <line x1="60" y1="20" x2="60" y2="230" />
+        <line x1="20" y1="230" x2="100" y2="230" />
+        <!-- Head -->
+        <circle cx="140" cy="70" r="20" class="figure-part" />
+        <!-- Body -->
+        <line x1="140" y1="90" x2="140" y2="150" class="figure-part" />
+        <!-- Arms -->
+        <line x1="140" y1="120" x2="120" y2="100" class="figure-part" />
+        <line x1="140" y1="120" x2="160" y2="100" class="figure-part" />
+        <!-- Legs -->
+        <line x1="140" y1="150" x2="120" y2="180" class="figure-part" />
+        <line x1="140" y1="150" x2="160" y2="180" class="figure-part" />
+      </svg>
 
       <div class="wrong-letters-container">
         <div id="wrong-letters">
@@ -38,98 +54,65 @@
 </template>
 
 <script>
-import svgHangman from './svgHangman.vue';
-import countries from '../countries.json';
+import { ref, computed, onMounted } from 'vue';
+import countries from '../assets/countries.json';
 export default {
   name: 'Game',
-  data() {
-    return {
-      words: countries,
-      selectedWord: '',
-      correctLetters: [],
-      wrongLetters: [],
-      letters: [],
-      finalMessage: '',
-      wrongTitle: '',
-      notification: false,
-      popup: false,
-      finished: false,
-    };
-  },
-  computed: {
-    displayedWord() {
-      return this.letters.join('');
-    },
-  },
-  components: {
-    svgHangman,
-  },
-  created() {
-    window.addEventListener('keydown', e => {
-      if ((e.keyCode >= 65 && e.keyCode <= 90) || e.keyCode === 32) {
-        const letter = e.key.toLowerCase();
-        if (this.finished != true) {
-          if (this.selectedWord.includes(letter)) {
-            if (!this.correctLetters.includes(letter)) {
-              this.correctLetters.push(letter);
-              this.displayWord();
-            } else {
-              this.showNotification();
-            }
-          } else {
-            if (!this.wrongLetters.includes(letter)) {
-              this.wrongLetters.push(letter);
-              this.updateWrongLettersEl();
-            } else {
-              this.showNotification();
-            }
-          }
-        }
-      } else if (e.keyCode === 13) {
-        // Enter key pressed
-        if (this.finished) {
-          this.playAgain();
-        }
-      }
+  setup() {
+    // =====================================================
+    // Data
+    // =====================================================
+    const words = ref(countries);
+    const selectedWord = ref('');
+    const correctLetters = ref([]);
+    const wrongLetters = ref([]);
+    const letters = ref([]);
+    const finalMessage = ref('');
+    const wrongTitle = ref('');
+    const notification = ref(false);
+    const popup = ref(false);
+    const finished = ref(false);
+    // =====================================================
+    // Computed
+    // =====================================================
+    const displayedWord = computed(function () {
+      return letters.value.join('');
     });
-  },
-  mounted() {
-    this.selectWord();
-    this.displayWord();
-  },
-  methods: {
+    // =====================================================
+    // Methods
+    // =====================================================
     // choose a random word
-    selectWord() {
-      this.selectedWord = this.words[Math.floor(Math.random() * this.words.length)].name.toLowerCase();
-    },
+    function selectWord() {
+      selectedWord.value = words.value[Math.floor(Math.random() * words.value.length)].name.toLowerCase();
+    }
     // Display the word / letters
-    displayWord() {
-      this.letters = this.selectedWord.split('').map(letter => (this.correctLetters.includes(letter) ? letter : ''));
+    function displayWord() {
+      letters.value = selectedWord.value.split('').map((letter) => (correctLetters.value.includes(letter) ? letter : ''));
       // If user won
-      if (this.displayedWord === this.selectedWord) {
-        this.finished = true;
-        this.popup = true;
-        this.finalMessage = '💪';
+      if (displayedWord.value === selectedWord.value) {
+        finished.value = true;
+        popup.value = true;
+        finalMessage.value = '💪';
       }
-    },
+    }
     // If user types the same letter again
-    showNotification() {
-      this.notification = true;
+    function showNotification() {
+      notification.value = true;
       setTimeout(() => {
-        this.notification = false;
+        notification.value = false;
       }, 2000);
-    },
+    }
     // if user enters a wrong letter
-    updateWrongLettersEl() {
-      if (this.wrongLetters.length > 0) {
-        this.wrongTitle = 'Wrong:';
+    function updateWrongLettersEl() {
+      if (wrongLetters.value.length > 0) {
+        wrongTitle.value = 'Wrong:';
       } else {
-        this.wrongTitle = '';
+        wrongTitle.value = '';
       }
       // Display parts
       const figureParts = document.querySelectorAll('.figure-part');
       figureParts.forEach((part, index) => {
-        const errors = this.wrongLetters.length;
+        const errors = wrongLetters.value.length;
         if (index < errors) {
           part.style.display = 'block';
         } else {
@@ -138,22 +121,78 @@ export default {
       });
 
       // Check if lost
-      if (this.wrongLetters.length === figureParts.length) {
-        this.finished = true;
-        this.finalMessage = '👎';
-        this.popup = true;
+      if (wrongLetters.value.length === figureParts.length) {
+        finished.value = true;
+        finalMessage.value = '👎';
+        popup.value = true;
       }
-    },
+    }
     // Reset the game
-    playAgain() {
-      this.correctLetters.splice(0);
-      this.wrongLetters.splice(0);
-      this.finished = false;
-      this.selectWord();
-      this.displayWord();
-      this.updateWrongLettersEl();
-      this.popup = false;
-    },
+    function playAgain() {
+      correctLetters.value.splice(0);
+      wrongLetters.value.splice(0);
+      finished.value = false;
+      selectWord();
+      displayWord();
+      updateWrongLettersEl();
+      popup.value = false;
+    }
+    // =====================================================
+    // previously "created" hook
+    // =====================================================
+    window.addEventListener('keydown', (e) => {
+      if ((e.keyCode >= 65 && e.keyCode <= 90) || e.keyCode === 32) {
+        const letter = e.key.toLowerCase();
+        if (finished.value != true) {
+          if (selectedWord.value.includes(letter)) {
+            if (!correctLetters.value.includes(letter)) {
+              correctLetters.value.push(letter);
+              displayWord();
+            } else {
+              showNotification();
+            }
+          } else {
+            if (!wrongLetters.value.includes(letter)) {
+              wrongLetters.value.push(letter);
+              updateWrongLettersEl();
+            } else {
+              showNotification();
+            }
+          }
+        }
+      } else if (e.keyCode === 13) {
+        // Enter key pressed
+        if (finished.value) {
+          playAgain();
+        }
+      }
+    });
+    // =====================================================
+    // previously "created" hook
+    // =====================================================
+    onMounted(() => {
+      selectWord();
+      displayWord();
+    });
+
+    return {
+      words,
+      selectedWord,
+      correctLetters,
+      wrongLetters,
+      letters,
+      finalMessage,
+      wrongTitle,
+      notification,
+      popup,
+      finished,
+      selectWord,
+      displayedWord,
+      displayWord,
+      showNotification,
+      updateWrongLettersEl,
+      playAgain,
+    };
   },
 };
 </script>

@@ -3,7 +3,6 @@
 # TODO
 
 - manage empty spaces
-- find another json list with flags and stats
 
 ## Project setup
 
