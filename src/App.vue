@@ -1,7 +1,5 @@
 <template>
-  <div id="app">
-    <Game />
-  </div>
+  <Game />
 </template>
 
 <script setup>
