@@ -197,7 +197,7 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .game-container {
   padding: 20px 30px;
   position: relative;
@@ -252,9 +252,9 @@ export default {
   display: none;
   align-items: center;
   justify-content: center;
-  &.show {
-    display: flex;
-  }
+}
+.popup-container.show {
+  display: flex;
 }
 
 .popup {
